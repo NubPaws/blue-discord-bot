@@ -75,6 +75,13 @@ async function fetchVideo(url: string): Promise<Song> {
   };
 }
 
+async function fetch(query: string): Promise<Song[]> {
+  if (query.includes('list=')) {
+    return fetchPlaylist(query);
+  }
+  return [await fetchVideo(query)];
+}
+
 async function fetchSearch(query: string): Promise<Song> {
   const youtube = getClient();
   const res = await youtube.search.list({
@@ -101,5 +108,6 @@ export default {
   getClient,
   fetchPlaylist,
   fetchVideo,
+  fetch,
   fetchSearch,
 }

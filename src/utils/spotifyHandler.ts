@@ -25,6 +25,10 @@ async function initialize() {
   }
 }
 
+function isUrl(url: string): boolean {
+  return url.includes('spotify.com');
+}
+
 async function fetchTrack(url: string): Promise<SpotifySong> {
   // Expected format: https://open.spotify.com/track/{id}
   const regex = /track\/([a-zA-Z0-9]+)/;
@@ -46,7 +50,7 @@ async function fetchTrack(url: string): Promise<SpotifySong> {
   };
 }
 
-async function fetchPlaylist(url: string): Promise<Array<SpotifySong>> {
+async function fetchPlaylist(url: string): Promise<SpotifySong[]> {
   // Expected format: https://open.spotify.com/playlist/{id}
   const regex = /playlist\/([a-zA-Z0-9]+)/;
   const match = url.match(regex);
@@ -66,13 +70,22 @@ async function fetchPlaylist(url: string): Promise<Array<SpotifySong>> {
   }));
 }
 
+async function fetch(query: string): Promise<SpotifySong[]> {
+  if (query.includes('/track/')) {
+    return [await fetchTrack(query)];
+  }
+  return fetchPlaylist(query);
+}
+
 async function searchYouTubeForTrack({ title, artist }: SpotifySong): Promise<Song> {
   const query = `${title} ${artist}`;
   return await youtubeHandler.fetchSearch(query);
 }
 
 export default {
+  isUrl,
   fetchTrack,
   fetchPlaylist,
+  fetch,
   searchYouTubeForTrack,
 }
