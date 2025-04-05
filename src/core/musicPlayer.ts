@@ -1,10 +1,6 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, VoiceConnection } from "@discordjs/voice";
 import ytdl from "ytdl-core";
-
-interface Song {
-  title: string;
-  url: string;
-}
+import { Song } from "../types/Song";
 
 export class MusicPlayer {
   private queue: Song[] = [];
