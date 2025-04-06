@@ -1,7 +1,7 @@
-import { Message } from "discord.js";
-import { Command } from "../types/Command";
-import { GuildNotFoundError } from "../utils/errors";
-import { getMusicPlayer } from "../core/musicManager";
+import { Message } from 'discord.js';
+import { Command } from '../types/Command';
+import { GuildNotFoundError } from '../utils/errors';
+import { getMusicPlayer } from '../core/musicManager';
 
 export const command: Command = {
   name: 'queue',
@@ -19,9 +19,7 @@ export const command: Command = {
       await message.reply('The queue is empty.');
       return;
     }
-    const queueMessage = queue.map((song, index) => (
-      `${index + 1}. ${song.title}`
-    )).join("\n");
+    const queueMessage = queue.map((song, index) => `${index + 1}. ${song.title}`).join('\n');
     await message.reply(`Current queue:\n${queueMessage}`);
   },
 };

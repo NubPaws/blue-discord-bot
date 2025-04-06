@@ -1,7 +1,7 @@
-import { Message } from "discord.js";
-import { Command } from "../types/Command";
-import { GuildNotFoundError } from "../utils/errors";
-import { getMusicPlayer } from "../core/musicManager";
+import { Message } from 'discord.js';
+import { Command } from '../types/Command';
+import { GuildNotFoundError } from '../utils/errors';
+import { getMusicPlayer } from '../core/musicManager';
 
 export const command: Command = {
   name: 'skip',

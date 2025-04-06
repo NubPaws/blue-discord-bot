@@ -1,7 +1,7 @@
-import { Client, GatewayIntentBits } from "discord.js";
-import logger from "../utils/logger";
-import { handleCommand, loadCommands } from "./commandHandler";
-import environment from "../config/environment";
+import { Client, GatewayIntentBits } from 'discord.js';
+import logger from '../utils/logger';
+import { handleCommand, loadCommands } from './commandHandler';
+import environment from '../config/environment';
 
 const client = new Client({
   intents: [

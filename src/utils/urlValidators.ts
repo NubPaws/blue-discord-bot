@@ -1,4 +1,3 @@
-
 export function isValidUrl(str: string): boolean {
   try {
     new URL(str);

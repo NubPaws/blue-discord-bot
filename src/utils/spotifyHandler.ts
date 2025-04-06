@@ -34,7 +34,7 @@ async function fetchTrack(url: string): Promise<SpotifySong> {
   const regex = /track\/([a-zA-Z0-9]+)/;
   const match = url.match(regex);
   if (!match) {
-    throw new Error("Invalid Spotify track URL");
+    throw new Error('Invalid Spotify track URL');
   }
 
   const trackId = match[1];
@@ -46,7 +46,7 @@ async function fetchTrack(url: string): Promise<SpotifySong> {
 
   return {
     title: track.name,
-    artist: track.artists.map(a => a.name).join(', '),
+    artist: track.artists.map((a) => a.name).join(', '),
   };
 }
 
@@ -55,7 +55,7 @@ async function fetchPlaylist(url: string): Promise<SpotifySong[]> {
   const regex = /playlist\/([a-zA-Z0-9]+)/;
   const match = url.match(regex);
   if (!match) {
-    throw new Error("Invalid Spotify playlist URL");
+    throw new Error('Invalid Spotify playlist URL');
   }
   const playlistId = match[1];
 
@@ -88,4 +88,4 @@ export default {
   fetchPlaylist,
   fetch,
   searchYouTube,
-}
+};

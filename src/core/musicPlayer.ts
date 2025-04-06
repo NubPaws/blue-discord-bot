@@ -4,20 +4,22 @@ import {
   createAudioPlayer,
   createAudioResource,
   StreamType,
-  VoiceConnection
-} from "@discordjs/voice";
-import { Song } from "../types/Song";
-import logger from "../utils/logger";
-import { spawn } from "child_process";
-import Stream from "stream";
+  VoiceConnection,
+} from '@discordjs/voice';
+import { Song } from '../types/Song';
+import logger from '../utils/logger';
+import { spawn } from 'child_process';
+import Stream from 'stream';
 
 function createYtDlpStream(url: string): Stream.Readable {
-  const ytdlp = spawn("yt-dlp", [
-    "--quiet",        // Suppress non-critical output.
-    "--no-progress",  // Disable the progress bar.
-    "-f", "bestaudio",
-    "-o", "-",        // Output to stdout.
-    url
+  const ytdlp = spawn('yt-dlp', [
+    '--quiet', // Suppress non-critical output.
+    '--no-progress', // Disable the progress bar.
+    '-f',
+    'bestaudio',
+    '-o',
+    '-', // Output to stdout.
+    url,
   ]);
 
   ytdlp.stderr.on('data', (data) => {
@@ -33,17 +35,22 @@ function createYtDlpStream(url: string): Stream.Readable {
 
 function createFfmpegStream(stream: Stream.Readable): Stream.Readable {
   const ffmpeg = spawn('ffmpeg', [
-    "-loglevel", "0",     // Suppress non-error logs.
-    "-i", "pipe:0",       // Input from yt-dlp's stdout.
-    "-f", "opus",         // Output format: Opus.
-    "-ar", "48000",       // Set sample rate to 48000 Hz.
-    "-ac", "2",           // Output stereo audio.
-    "pipe:1"              // Output to stdout.
+    '-loglevel',
+    '0', // Suppress non-error logs.
+    '-i',
+    'pipe:0', // Input from yt-dlp's stdout.
+    '-f',
+    'opus', // Output format: Opus.
+    '-ar',
+    '48000', // Set sample rate to 48000 Hz.
+    '-ac',
+    '2', // Output stereo audio.
+    'pipe:1', // Output to stdout.
   ]);
 
   ffmpeg.stderr.on('data', (data) => {
     logger.log('ffmpeg', `Error: ${data}`);
-  })
+  });
 
   ffmpeg.on('exit', (code) => {
     logger.log('ffmpeg', `Exited with code ${code}`);

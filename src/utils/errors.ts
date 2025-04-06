@@ -1,4 +1,3 @@
-
 export class GuildNotFoundError extends Error {}
 
 export class NoActiveMusicPlayerError extends Error {}

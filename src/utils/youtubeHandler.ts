@@ -1,7 +1,7 @@
-import { google, youtube_v3 } from "googleapis";
-import environment from "../config/environment";
-import { Song } from "../types/Song";
-import { isValidUrl } from "./urlValidators";
+import { google, youtube_v3 } from 'googleapis';
+import environment from '../config/environment';
+import { Song } from '../types/Song';
+import { isValidUrl } from './urlValidators';
 
 function isUrl(url: string): boolean {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -33,11 +33,11 @@ async function fetchPlaylist(url: string): Promise<Song[]> {
   });
 
   if (!res.data.items) {
-    throw new Error("No playlist items found.");
+    throw new Error('No playlist items found.');
   }
 
-  return res.data.items.map(item => ({
-    title: item.snippet?.title || "Unknown Title",
+  return res.data.items.map((item) => ({
+    title: item.snippet?.title || 'Unknown Title',
     url: `https://www.youtube.com/watch?v=${item.snippet?.resourceId?.videoId}`,
   }));
 }
@@ -49,9 +49,7 @@ async function fetchVideo(url: string): Promise<Song> {
 
   const urlObj = new URL(url);
   const videoId =
-    urlObj.hostname === 'youtu.be'
-    ? urlObj.pathname.slice(1)
-    : urlObj.searchParams.get('v');
+    urlObj.hostname === 'youtu.be' ? urlObj.pathname.slice(1) : urlObj.searchParams.get('v');
 
   if (!videoId) {
     throw new Error('Coud not extract video ID from URL');
@@ -110,4 +108,4 @@ export default {
   fetchVideo,
   fetch,
   fetchSearch,
-}
+};

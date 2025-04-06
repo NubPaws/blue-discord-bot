@@ -1,13 +1,13 @@
-import { Message } from "discord.js";
-import { Command } from "../types/Command";
-import { isValidUrl } from "../utils/urlValidators";
-import { Song } from "../types/Song";
-import { GuildNotFoundError, InvalidCommandArgumentsError } from "../utils/errors";
-import youtubeHandler from "../utils/youtubeHandler";
-import spotifyHandler from "../utils/spotifyHandler";
-import { createMusicPlayer, getMusicPlayer } from "../core/musicManager";
-import { MusicPlayer } from "../core/musicPlayer";
-import { joinVoiceChannel } from "@discordjs/voice";
+import { Message } from 'discord.js';
+import { Command } from '../types/Command';
+import { isValidUrl } from '../utils/urlValidators';
+import { Song } from '../types/Song';
+import { GuildNotFoundError, InvalidCommandArgumentsError } from '../utils/errors';
+import youtubeHandler from '../utils/youtubeHandler';
+import spotifyHandler from '../utils/spotifyHandler';
+import { createMusicPlayer, getMusicPlayer } from '../core/musicManager';
+import { MusicPlayer } from '../core/musicPlayer';
+import { joinVoiceChannel } from '@discordjs/voice';
 
 async function getSongsFromQuery(query: string): Promise<Song[]> {
   if (!isValidUrl(query)) {
@@ -58,7 +58,7 @@ const command: Command = {
     const songs = await getSongsFromQuery(query);
 
     if (songs.length === 0) {
-      await message.reply("No songs founds.");
+      await message.reply('No songs founds.');
       return;
     }
 
@@ -87,7 +87,6 @@ const command: Command = {
     } else {
       await message.reply(`Now playing: ${songs[0].title}`);
     }
-
   },
 };
 

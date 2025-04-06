@@ -1,13 +1,13 @@
-import { Message } from "discord.js";
-import { Command } from "../types/Command";
-import logger from "../utils/logger";
+import { Message } from 'discord.js';
+import { Command } from '../types/Command';
+import logger from '../utils/logger';
 
 import playCommand from '../commands/play';
 import * as stopCommand from '../commands/stop';
 import * as skipCommand from '../commands/skip';
 import * as disconnectCommand from '../commands/disconnect';
 import * as queueCommand from '../commands/queue';
-import environment from "../config/environment";
+import environment from '../config/environment';
 
 const commandsArray: Command[] = [
   playCommand,
@@ -37,7 +37,7 @@ export function loadCommands() {
 }
 
 export async function handleCommand(message: Message, prefix: string) {
-  if (!message.content.startsWith(prefix) || message.author.bot){
+  if (!message.content.startsWith(prefix) || message.author.bot) {
     return;
   }
 
@@ -60,6 +60,6 @@ export async function handleCommand(message: Message, prefix: string) {
     await command.execute(message, args);
   } catch (error) {
     logger.error(`Error executing command ${command.name}:`, error);
-    await message.reply("There was an error executing that command.");
+    await message.reply('There was an error executing that command.');
   }
 }
