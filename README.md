@@ -17,3 +17,6 @@ This is a modular Discord bot built using Node.js and TypeScript that supports m
 - `!skip` - Skip the current song.
 - `!disconnect` or `!dc` - Disconnect the bot from the voice channel.
 - `!queue` or `!q` - Display the current queue.
+
+User needs to install ffmpeg and yt-dlp
+Maybe make a docker container for it.

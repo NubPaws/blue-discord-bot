@@ -2,9 +2,20 @@ import { Message } from "discord.js";
 import { Command } from "../types/Command";
 import logger from "../utils/logger";
 
-const commandsArray: Command[] = [
+import playCommand from '../commands/play';
+import * as stopCommand from '../commands/stop';
+import * as skipCommand from '../commands/skip';
+import * as disconnectCommand from '../commands/disconnect';
+import * as queueCommand from '../commands/queue';
+import environment from "../config/environment";
 
-]
+const commandsArray: Command[] = [
+  playCommand,
+  stopCommand.command,
+  skipCommand.command,
+  disconnectCommand.command,
+  queueCommand.command,
+];
 
 const commands = new Map<string, Command>();
 
@@ -12,6 +23,7 @@ const commands = new Map<string, Command>();
  *  Load each command then if the command has aliasses load them as well.
  */
 export function loadCommands() {
+  const prefix = environment.discord.prefix;
   for (const cmd of commandsArray) {
     commands.set(cmd.name, cmd);
 
@@ -44,6 +56,7 @@ export async function handleCommand(message: Message, prefix: string) {
   }
 
   try {
+    logger.log('handleCommand', `Executing ${command.name} with arguments ${args}`);
     await command.execute(message, args);
   } catch (error) {
     logger.error(`Error executing command ${command.name}:`, error);

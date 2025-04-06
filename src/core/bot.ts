@@ -7,6 +7,7 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildVoiceStates,
   ],
 });
@@ -18,6 +19,6 @@ client.once('ready', () => {
 
 client.on('messageCreate', async (message) => {
   await handleCommand(message, environment.discord.prefix);
-})
+});
 
 client.login(environment.discord.token);

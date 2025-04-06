@@ -77,7 +77,7 @@ async function fetch(query: string): Promise<SpotifySong[]> {
   return fetchPlaylist(query);
 }
 
-async function searchYouTubeForTrack({ title, artist }: SpotifySong): Promise<Song> {
+async function searchYouTube({ title, artist }: SpotifySong): Promise<Song> {
   const query = `${title} ${artist}`;
   return await youtubeHandler.fetchSearch(query);
 }
@@ -87,5 +87,5 @@ export default {
   fetchTrack,
   fetchPlaylist,
   fetch,
-  searchYouTubeForTrack,
+  searchYouTube,
 }
