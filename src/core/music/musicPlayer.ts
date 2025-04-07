@@ -137,7 +137,7 @@ export class MusicPlayer {
       });
   }
 
-  private disconnect(): void {
+  public disconnect(): void {
     this.stop();
     if (this.connection.state.status !== VoiceConnectionStatus.Destroyed)
       this.connection.destroy();
