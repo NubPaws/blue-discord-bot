@@ -3,8 +3,9 @@ import { Command } from '@/types/Command';
 import logger from '@/utils/logger';
 import environment from '@/config/environment';
 import music from '@/commands/music';
+import management from '@/commands/management';
 
-const commandsArray: Command[] = [...music];
+const commandsArray: Command[] = [...music, ...management];
 
 const commands = new Map<string, Command>();
 
