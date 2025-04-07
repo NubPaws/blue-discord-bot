@@ -1,7 +1,6 @@
 import { Channel, Message } from 'discord.js';
 import { Command } from '@/types/Command';
 import logger from '@/utils/logger';
-import environment from '@/config/environment';
 import music from '@/commands/music';
 import management from '@/commands/management';
 import fun from '@/commands/fun';
@@ -10,11 +9,7 @@ const commandsArray: Command[] = [...music, ...management, ...fun];
 
 const commands = new Map<string, Command>();
 
-/**
- *  Load each command then if the command has aliasses load them as well.
- */
 export function loadCommands() {
-  const prefix = environment.discord.prefix;
   for (const cmd of commandsArray) {
     commands.set(cmd.name, cmd);
 
@@ -28,6 +23,9 @@ export function loadCommands() {
 }
 
 async function sendMessage(channel: Channel, contents: string) {
+  if (!contents) {
+    return;
+  }
   if (channel.isSendable()) {
     await channel.send(contents);
   }
@@ -58,11 +56,12 @@ export async function handleCommand(message: Message, prefix: string) {
       return;
     }
 
-    if (response.reply) {
-      message.reply(response.contents);
-    } else {
-      sendMessage(message.channel, response.contents);
-    }
+    // TODO: FIX THIS
+    // if (response.reply) {
+    //   message.reply(response.contents);
+    // } else {
+    //   sendMessage(message.channel, response.contents);
+    // }
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`Error executing command ${command.name}:`, error.message);

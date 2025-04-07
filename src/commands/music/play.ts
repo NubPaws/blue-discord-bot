@@ -8,45 +8,22 @@ import { isValidUrl } from '@/utils/music/urlValidators';
 import youtubeHandler from '@/utils/music/youtubeHandler';
 import { joinVoiceChannel } from '@discordjs/voice';
 import { Message } from 'discord.js';
+import { CommandResponse } from '@/types/Response';
+import { CommandHelpBuilder } from '@/utils/commandHelpBuilder';
 
-async function getSongsFromQuery(query: string): Promise<Song[]> {
-  if (!isValidUrl(query)) {
-    return [await youtubeHandler.fetchSearch(query)];
+export class PlayCommand extends Command {
+  constructor() {
+    super('play', 'Plays a song from YouTube or Spotify by searching for it.', ['p']);
   }
 
-  if (youtubeHandler.isUrl(query)) {
-    return youtubeHandler.fetch(query);
-  }
-
-  if (spotifyHandler.isUrl(query)) {
-    const spotifySongs = await spotifyHandler.fetch(query);
-    const songs: Song[] = [];
-
-    for (const song of spotifySongs) {
-      songs.push(await spotifyHandler.searchYouTube(song));
-    }
-
-    return songs;
-  }
-
-  // If we didn't match to anything, just fail.
-  throw new InvalidCommandArgumentsError('Unsupported URL.');
-}
-
-const command: Command = {
-  name: 'play',
-  aliases: ['p'],
-  description: 'Plays a song from YouTube or Spotify by searching for it.',
-  async execute(message: Message, args: string[]) {
+  public async execute(message: Message, args: string[]): Promise<CommandResponse> {
     if (!args.length) {
-      await message.reply('Please provide a song name or URL.');
-      return;
+      return CommandResponse.message('Please provide a song name or URL.');
     }
 
     const voiceChannel = message.member?.voice.channel;
     if (!voiceChannel) {
-      await message.reply('You need to join a voice channel first!');
-      return;
+      return CommandResponse.message('You need to join a voice channel first!');
     }
 
     const guildId = message.guild?.id;
@@ -55,11 +32,10 @@ const command: Command = {
     }
 
     const query = args.join(' ');
-    const songs = await getSongsFromQuery(query);
+    const songs = await this.getSongsFromQuery(query);
 
     if (songs.length === 0) {
-      await message.reply('No songs founds.');
-      return;
+      return CommandResponse.message('No songs found.');
     }
 
     let player: MusicPlayer;
@@ -83,11 +59,37 @@ const command: Command = {
     }
 
     if (songs.length > 1) {
-      await message.reply(`Enqueued ${songs.length} songs from your playlist/search.`);
+      return CommandResponse.message(`Enqueued ${songs.length} songs from your playlist/search.`);
     } else {
-      await message.reply(`Now playing: ${songs[0].title}`);
+      return CommandResponse.message(`Now playing: ${songs[0].title}`);
     }
-  },
-};
+  }
 
-export default command;
+  private async getSongsFromQuery(query: string): Promise<Song[]> {
+    if (!isValidUrl(query)) {
+      return [await youtubeHandler.fetchSearch(query)];
+    }
+
+    if (youtubeHandler.isUrl(query)) {
+      return youtubeHandler.fetch(query);
+    }
+
+    if (spotifyHandler.isUrl(query)) {
+      const spotifySongs = await spotifyHandler.fetch(query);
+      const songs: Song[] = [];
+      for (const song of spotifySongs) {
+        songs.push(await spotifyHandler.searchYouTube(song));
+      }
+      return songs;
+    }
+
+    throw new InvalidCommandArgumentsError('Unsupported URL.');
+  }
+
+  public help(): string {
+    return new CommandHelpBuilder()
+      .command(this.name, this.description)
+      .usage(`${this.name} <song name or URL>`)
+      .toString();
+  }
+}

@@ -1,7 +1,13 @@
-import disconnectCommand from './music/disconnect';
-import playCommand from './music/play';
-import queueCommand from './music/queue';
-import skipCommand from './music/skip';
-import stopCommand from './music/stop';
+import { DisconnectCommand } from '@/commands/music/disconnect';
+import { PlayCommand } from '@/commands/music/play';
+import { QueueCommand } from '@/commands/music/queue';
+import { SkipCommand } from '@/commands/music/skip';
+import { StopCommand } from '@/commands/music/stop';
 
-export default [playCommand, queueCommand, disconnectCommand, skipCommand, stopCommand];
+export default [
+  new PlayCommand(),
+  new QueueCommand(),
+  new DisconnectCommand(),
+  new SkipCommand(),
+  new StopCommand(),
+];

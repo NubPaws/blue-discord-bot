@@ -2,12 +2,19 @@ import { Message } from 'discord.js';
 import { Command } from '@/types/Command';
 import { GuildNotFoundError } from '@/utils/errors';
 import { getMusicPlayer, removeMusicPlayer } from '@/core/music/musicManager';
+import { CommandResponse } from '@/types/Response';
+import { CommandHelpBuilder } from '@/utils/commandHelpBuilder';
 
-const command: Command = {
-  name: 'disconnect',
-  aliases: ['dc'],
-  description: 'Disconnects the bot from the voice channel and clears any active queues.',
-  async execute(message: Message, args: string[]) {
+export class DisconnectCommand extends Command {
+  constructor() {
+    super(
+      'disconnect',
+      'Disconnects the bot from the voice channel and clears any active queues.',
+      ['dc'],
+    );
+  }
+
+  public async execute(message: Message, args: string[]): Promise<CommandResponse> {
     const guildId = message.guild?.id;
     if (!guildId) {
       throw new GuildNotFoundError();
@@ -16,8 +23,13 @@ const command: Command = {
     const player = getMusicPlayer(guildId);
     player.disconnect();
     removeMusicPlayer(guildId);
-    await message.reply('Disconnected.');
-  },
-};
+    return CommandResponse.message('Disconnected.');
+  }
 
-export default command;
+  public help(): string {
+    return new CommandHelpBuilder()
+      .command(this.name, this.description)
+      .usage(`${this.name}`)
+      .toString();
+  }
+}

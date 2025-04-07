@@ -1,3 +1,3 @@
-import clearChatCommand from './management/clearChat';
+import { ClearChatCommand } from '@/commands/management/clearChat';
 
-export default [clearChatCommand];
+export default [new ClearChatCommand()];

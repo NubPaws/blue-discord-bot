@@ -1,6 +1,3 @@
-// formatter.ts
-
-// Text Formatting Functions
 export function bold(text: string): string {
   return `**${text}**`;
 }
@@ -40,6 +37,14 @@ export function multilineQuote(text: string): string {
     .join('\n');
 }
 
+export function unorderedList(text: string[]): string {
+  return text.map((line) => `- ${line}`).join('\n');
+}
+
+export function orderedList(text: string[]): string {
+  return text.map((line, index) => `${index + 1}. ${line}`).join('\n');
+}
+
 // Mention Functions
 export function mentionUser(userId: string): string {
   return `<@${userId}>`;
@@ -51,9 +56,4 @@ export function mentionRole(roleId: string): string {
 
 export function mentionChannel(channelId: string): string {
   return `<#${channelId}>`;
-}
-
-// Example: Combos
-export function emphasizedQuote(text: string): string {
-  return blockQuote(bold(text));
 }

@@ -1,13 +1,16 @@
 import { Message } from 'discord.js';
 import { Command } from '@/types/Command';
 import { getMusicPlayer } from '@/core/music/musicManager';
-import { GuildNotFoundError, NoActiveMusicPlayerError } from '@/utils/errors';
+import { GuildNotFoundError } from '@/utils/errors';
+import { CommandResponse } from '@/types/Response';
+import { CommandHelpBuilder } from '@/utils/commandHelpBuilder';
 
-const command: Command = {
-  name: 'stop',
-  aliases: [],
-  description: 'Stops the music and clears the queue.',
-  async execute(message: Message, args: string[]) {
+export class StopCommand extends Command {
+  constructor() {
+    super('stop', 'Stops the music and clears the queue.');
+  }
+
+  public async execute(message: Message, args: string[]): Promise<CommandResponse> {
     const guildId = message.guild?.id;
     if (!guildId) {
       throw new GuildNotFoundError();
@@ -15,8 +18,13 @@ const command: Command = {
 
     const player = getMusicPlayer(guildId);
     player.stop();
-    await message.reply('Stopping...');
-  },
-};
+    return CommandResponse.message('Stopping...');
+  }
 
-export default command;
+  public help(): string {
+    return new CommandHelpBuilder()
+      .command(this.name, this.description)
+      .usage(`${this.name}`)
+      .toString();
+  }
+}

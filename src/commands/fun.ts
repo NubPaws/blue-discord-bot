@@ -1,3 +1,3 @@
-import scoreboardCommand from './fun/scoreboard';
+import { ScoreboardCommand } from '@/commands/fun/scoreboard';
 
-export default [scoreboardCommand];
+export default [new ScoreboardCommand()];
