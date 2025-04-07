@@ -4,17 +4,7 @@ import { GuildNotFoundError, InvalidCommandArgumentsError } from '@/utils/errors
 import { Message } from 'discord.js';
 import { AlignmentEnum, AsciiTable3 } from 'ascii-table3';
 import { ScoreboardDoesNotExistsError } from '@/utils/fun/errors';
-import { codeBlock } from '@/utils/formatter';
-import logger from '@/utils/logger';
-
-function getUserIdFromMention(mention: string) {
-  const userIdMatch = mention.match(/^<@!?(\d+)>$/);
-  if (!userIdMatch) {
-    return undefined;
-  }
-
-  return userIdMatch[1];
-}
+import { codeBlock, mentionUser } from '@/utils/formatter';
 
 function handleCreate(guildId: string, scoreboardName: string) {
   scoreboardHandler.create(guildId, scoreboardName);
@@ -24,39 +14,11 @@ function handleDelete(guildId: string, scoreboardName: string) {
   scoreboardHandler.delete(guildId, scoreboardName);
 }
 
-function handleSet(guildId: string, scoreboardName: string, args: string[]) {
-  logger.info(guildId, scoreboardName, args);
-  const mention = args[2];
-  const valueArg = args[3];
-
-  if (!mention || !valueArg) {
-    throw new InvalidCommandArgumentsError();
-  }
-
-  const value = parseInt(valueArg);
-  if (isNaN(value)) {
-    throw new InvalidCommandArgumentsError();
-  }
-
-  const userId = getUserIdFromMention(mention);
-  if (!userId) {
-    throw new InvalidCommandArgumentsError();
-  }
-
+function handleSet(guildId: string, scoreboardName: string, userId: string, value: number) {
   scoreboardHandler.setScore(guildId, scoreboardName, userId, value);
 }
 
-async function handleRemove(guildId: string, scoreboardName: string, args: string[]) {
-  const mention = args[2];
-  if (!mention) {
-    throw new InvalidCommandArgumentsError();
-  }
-
-  const userId = getUserIdFromMention(mention);
-  if (!userId) {
-    throw new InvalidCommandArgumentsError();
-  }
-
+function handleRemove(guildId: string, scoreboardName: string, userId: string) {
   scoreboardHandler.removeScore(guildId, scoreboardName, userId);
 }
 
@@ -69,7 +31,7 @@ function handleShow(guildId: string, scoreboardName: string): string {
   const table = new AsciiTable3(scoreboardName)
     .setHeading('User', 'Score')
     .setAlign(2, AlignmentEnum.CENTER)
-    .addRowMatrix(Object.entries(data).map(([user, score]) => [user, score]));
+    .addRowMatrix(Object.entries(data).map(([user, score]) => [mentionUser(user), score]));
 
   return codeBlock(table.toString());
 }
@@ -106,14 +68,25 @@ const command: Command = {
         handleDelete(guildId, scoreboardName);
         await message.reply(`Scoreboard ${scoreboardName} deleted successfully.`);
         break;
-      case 'set':
-        handleSet(guildId, scoreboardName, args.slice(2));
-        await message.reply(`Scoreboard score set.`);
+      case 'set': {
+        const user = message.mentions.users.first();
+        const value = parseInt(args[3]);
+        if (!user || isNaN(value)) {
+          throw new InvalidCommandArgumentsError();
+        }
+        handleSet(guildId, scoreboardName, user.id, value);
+        await message.reply(`Scoreboard score set for ${user.tag}.`);
         break;
-      case 'remove':
-        handleRemove(guildId, scoreboardName, args.slice(2));
-        await message.reply(`Scoreboard score removed.`);
+      }
+      case 'remove': {
+        const user = message.mentions.users.first();
+        if (!user) {
+          throw new InvalidCommandArgumentsError();
+        }
+        handleRemove(guildId, scoreboardName, user.id);
+        await message.reply(`Scoreboard score removed for ${user.tag}.`);
         break;
+      }
       case 'show':
         await message.reply(handleShow(guildId, scoreboardName));
         break;

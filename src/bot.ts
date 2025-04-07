@@ -1,21 +1,13 @@
-import { Client, GatewayIntentBits } from 'discord.js';
 import { handleCommand, loadCommands } from '@/core/commandHandler';
 import environment from '@/config/environment';
-import { dirname } from 'path';
 import logger from '@/utils/logger';
-
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildVoiceStates,
-  ],
-});
+import client from '@/client';
 
 client.once('ready', () => {
-  logger.info(`Logged in as ${client.user?.tag}`);
+  logger.info(`Logged in as ${client.selfTag()}`);
   loadCommands();
+
+  logger.info(`Bot invite link ${client.getInviteLink()}`);
 });
 
 client.on('messageCreate', async (message) => {
