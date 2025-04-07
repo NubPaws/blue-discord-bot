@@ -1,0 +1,8 @@
+services:
+  blue-discord-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: blue-discord-bot
+    env_file:
+      - .env
