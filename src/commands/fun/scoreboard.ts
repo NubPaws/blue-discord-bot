@@ -8,45 +8,6 @@ import { codeBlock } from '@/utils/messageFormatter';
 import { CommandHelpBuilder } from '@/utils/commandHelpBuilder';
 import { CommandResponse } from '@/types/Response';
 
-function handleCreate(guildId: string, scoreboardName: string) {
-  scoreboardHandler.create(guildId, scoreboardName);
-}
-
-function handleDelete(guildId: string, scoreboardName: string) {
-  scoreboardHandler.delete(guildId, scoreboardName);
-}
-
-function handleSet(guildId: string, scoreboardName: string, args: string[]) {
-  const user = args[2];
-  const value = parseInt(args[3]);
-  if (!user || isNaN(value)) {
-    throw new InvalidCommandArgumentsError();
-  }
-  scoreboardHandler.setScore(guildId, scoreboardName, user, value);
-}
-
-function handleRemove(guildId: string, scoreboardName: string, args: string[]) {
-  const user = args[2];
-  if (!user) {
-    throw new InvalidCommandArgumentsError();
-  }
-  scoreboardHandler.removeScore(guildId, scoreboardName, user);
-}
-
-function handleShow(guildId: string, scoreboardName: string): string {
-  const data = scoreboardHandler.get(guildId, scoreboardName);
-  if (Object.keys(data).length === 0) {
-    throw new ScoreboardDoesNotExistsError();
-  }
-
-  const table = new AsciiTable3(scoreboardName)
-    .setHeading('User', 'Score')
-    .setAlign(2, AlignmentEnum.CENTER)
-    .addRowMatrix(Object.entries(data).map(([user, score]) => [user, score]));
-
-  return codeBlock(table.toString());
-}
-
 export class ScoreboardCommand extends Command {
   constructor() {
     super('scoreboard', 'Manages scoreboards (creates, sets, removes).', ['score']);
@@ -59,41 +20,78 @@ export class ScoreboardCommand extends Command {
     }
 
     if (args.length === 0) {
-      throw new InvalidCommandArgumentsError(
-        'Usage !scoreboard <create|set|remove|show> <scoreboard-name> [args]',
-      );
+      throw new InvalidCommandArgumentsError();
     }
 
     const subCommand = args[0];
     const scoreboardName = args[1];
 
     if (!subCommand || !scoreboardName) {
-      throw new InvalidCommandArgumentsError('Please provide an action and a scoreboard name.');
+      throw new InvalidCommandArgumentsError();
     }
 
     switch (subCommand) {
       case 'create':
-        handleCreate(guildId, scoreboardName);
+        this.handleCreate(guildId, scoreboardName);
         return CommandResponse.message(`Scoreboard ${scoreboardName} created successfully.`);
       case 'delete':
         if (message.member?.permissions.has(PermissionsBitField.Flags.Administrator)) {
-          handleDelete(guildId, scoreboardName);
+          this.handleDelete(guildId, scoreboardName);
           return CommandResponse.message(`Scoreboard ${scoreboardName} deleted successfully.`);
         }
-        return CommandResponse.message(`Only admins can delete scoreboards.`);
+        return CommandResponse.message('Only admins can delete scoreboards.');
       case 'set': {
-        handleSet(guildId, scoreboardName, args.slice(2));
+        this.handleSet(guildId, scoreboardName, args.slice(2));
         return CommandResponse.react('👍');
       }
       case 'remove': {
-        handleRemove(guildId, scoreboardName, args.slice(2));
-        return CommandResponse.react(`👍`);
+        this.handleRemove(guildId, scoreboardName, args.slice(2));
+        return CommandResponse.react('👍');
       }
       case 'show':
-        return CommandResponse.message(handleShow(guildId, scoreboardName));
+        return CommandResponse.message(this.handleShow(guildId, scoreboardName));
     }
 
-    return CommandResponse.message('Wrong usage of the command, read the help page.');
+    throw new InvalidCommandArgumentsError();
+  }
+
+  private handleCreate(guildId: string, scoreboardName: string) {
+    scoreboardHandler.create(guildId, scoreboardName);
+  }
+
+  private handleDelete(guildId: string, scoreboardName: string) {
+    scoreboardHandler.delete(guildId, scoreboardName);
+  }
+
+  private handleSet(guildId: string, scoreboardName: string, args: string[]) {
+    const user = args[0];
+    const value = parseInt(args[1]);
+    if (!user || isNaN(value)) {
+      throw new InvalidCommandArgumentsError();
+    }
+    scoreboardHandler.setScore(guildId, scoreboardName, user, value);
+  }
+
+  private handleRemove(guildId: string, scoreboardName: string, args: string[]) {
+    const user = args[0];
+    if (!user) {
+      throw new InvalidCommandArgumentsError();
+    }
+    scoreboardHandler.removeScore(guildId, scoreboardName, user);
+  }
+
+  private handleShow(guildId: string, scoreboardName: string): string {
+    const data = scoreboardHandler.get(guildId, scoreboardName);
+    if (Object.keys(data).length === 0) {
+      throw new ScoreboardDoesNotExistsError();
+    }
+
+    const table = new AsciiTable3(scoreboardName)
+      .setHeading('', 'User', 'Score')
+      .setAlign(2, AlignmentEnum.CENTER)
+      .addRowMatrix(Object.entries(data).map(([user, score], index) => [index, user, score]));
+
+    return codeBlock(table.toString());
   }
 
   public help(): string {

@@ -4,9 +4,9 @@ export type CommandResponseType = 'message' | 'reply' | 'react' | 'none';
 
 export class CommandResponse {
   readonly type: CommandResponseType;
-  readonly content?: string;
+  readonly content: string;
 
-  private constructor(type: CommandResponseType, content?: string) {
+  private constructor(type: CommandResponseType, content: string) {
     this.type = type;
     this.content = content;
   }
@@ -24,6 +24,6 @@ export class CommandResponse {
   }
 
   static none(): CommandResponse {
-    return new CommandResponse('none');
+    return new CommandResponse('none', '');
   }
 }

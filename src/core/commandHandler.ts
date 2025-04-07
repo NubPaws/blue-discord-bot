@@ -52,16 +52,18 @@ export async function handleCommand(message: Message, prefix: string) {
 
   try {
     const response = await command.execute(message, args);
-    if (!response) {
-      return;
-    }
 
-    // TODO: FIX THIS
-    // if (response.reply) {
-    //   message.reply(response.contents);
-    // } else {
-    //   sendMessage(message.channel, response.contents);
-    // }
+    switch (response.type) {
+      case 'message':
+        sendMessage(message.channel, response.content);
+        break;
+      case 'reply':
+        message.reply(response.content);
+        break;
+      case 'react':
+        message.react(response.content);
+        break;
+    }
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`Error executing command ${command.name}:`, error.message);
