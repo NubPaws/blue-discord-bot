@@ -4,6 +4,8 @@ import logger from '@/utils/logger';
 import music from '@/commands/music';
 import management from '@/commands/management';
 import fun from '@/commands/fun';
+import { CommandResponse } from '@/types/Response';
+import { subtitle } from '@/utils/messageFormatter';
 
 const commandsArray: Command[] = [...music, ...management, ...fun];
 
@@ -31,6 +33,20 @@ async function sendMessage(channel: Channel, contents: string) {
   }
 }
 
+function handleResponse(response: CommandResponse, message: Message) {
+  switch (response.type) {
+    case 'message':
+      sendMessage(message.channel, response.content);
+      break;
+    case 'reply':
+      message.reply(response.content);
+      break;
+    case 'react':
+      message.react(response.content);
+      break;
+  }
+}
+
 export async function handleCommand(message: Message, prefix: string) {
   if (!message.content.startsWith(prefix) || message.author.bot) {
     return;
@@ -44,6 +60,16 @@ export async function handleCommand(message: Message, prefix: string) {
     return;
   }
 
+  if (commandName === 'help') {
+    sendMessage(
+      message.channel,
+      commandsArray
+        .map((cmd) => subtitle(cmd.name) + '\n' + cmd.help())
+        .join('\n\n'),
+    );
+    return;
+  }
+
   const command = commands.get(commandName);
   if (!command) {
     await message.reply(`Unknown command \`${commandName}\`.`);
@@ -53,17 +79,7 @@ export async function handleCommand(message: Message, prefix: string) {
   try {
     const response = await command.execute(message, args);
 
-    switch (response.type) {
-      case 'message':
-        sendMessage(message.channel, response.content);
-        break;
-      case 'reply':
-        message.reply(response.content);
-        break;
-      case 'react':
-        message.react(response.content);
-        break;
-    }
+    handleResponse(response, message);
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`Error executing command ${command.name}:`, error.message);

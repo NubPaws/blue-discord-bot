@@ -1,10 +1,13 @@
 import environment from '@/config/environment';
+import { multilineQuote } from '@/utils/messageFormatter';
 
 export class CommandHelpBuilder {
   private lines: string[] = [];
 
   command(name: string, description: string): this {
-    this.lines.push(`**${environment.discord.prefix}${name}** - ${description}`);
+    this.lines.push(
+      `**${environment.discord.prefix}${name}** - ${description}`,
+    );
     return this;
   }
 
@@ -34,6 +37,6 @@ export class CommandHelpBuilder {
   }
 
   toString(): string {
-    return this.lines.join('\n');
+    return multilineQuote(this.lines.join('\n'));
   }
 }

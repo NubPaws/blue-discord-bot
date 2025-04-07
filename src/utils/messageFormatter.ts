@@ -45,6 +45,18 @@ export function orderedList(text: string[]): string {
   return text.map((line, index) => `${index + 1}. ${line}`).join('\n');
 }
 
+export function title(text: string): string {
+  return `# ${text}`;
+}
+
+export function subtitle(text: string): string {
+  return `## ${text}`;
+}
+
+export function subsubtitle(text: string): string {
+  return `### ${text}`;
+}
+
 // Mention Functions
 export function mentionUser(userId: string): string {
   return `<@${userId}>`;

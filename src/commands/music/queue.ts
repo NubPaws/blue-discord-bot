@@ -4,13 +4,14 @@ import { GuildNotFoundError } from '@/utils/errors';
 import { getMusicPlayer } from '@/core/music/musicManager';
 import { CommandResponse } from '@/types/Response';
 import { CommandHelpBuilder } from '@/utils/commandHelpBuilder';
+import { orderedList, subtitle } from '@/utils/messageFormatter';
 
 export class QueueCommand extends Command {
   constructor() {
     super('queue', 'Displays the current music queue.', ['q']);
   }
 
-  public async execute(message: Message, args: string[]): Promise<CommandResponse> {
+  public async execute(message: Message): Promise<CommandResponse> {
     const guildId = message.guild?.id;
     if (!guildId) {
       throw new GuildNotFoundError();
@@ -22,8 +23,12 @@ export class QueueCommand extends Command {
       return CommandResponse.message('The queue is empty.');
     }
 
-    const queueMessage = queue.map((song, index) => `${index + 1}. ${song.title}`).join('\n');
-    return CommandResponse.message(`Current queue:\n${queueMessage}`);
+    const queueMessage = orderedList(
+      queue.slice(0, 10).map((song) => song.title),
+    );
+    return CommandResponse.message(
+      subtitle('Current queue:') + '\n' + queueMessage,
+    );
   }
 
   public help(): string {
