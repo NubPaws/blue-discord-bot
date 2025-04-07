@@ -2,21 +2,29 @@ import { createMusicPlayer, getMusicPlayer } from '@/core/music/musicManager';
 import { MusicPlayer } from '@/core/music/musicPlayer';
 import { Command } from '@/types/Command';
 import { Song } from '@/types/music/Song';
-import { GuildNotFoundError, InvalidCommandArgumentsError } from '@/utils/errors';
+import {
+  GuildNotFoundError,
+  InvalidCommandArgumentsError,
+} from '@/utils/errors';
 import spotifyHandler from '@/utils/music/spotifyHandler';
 import { isValidUrl } from '@/utils/music/urlValidators';
 import youtubeHandler from '@/utils/music/youtubeHandler';
 import { joinVoiceChannel } from '@discordjs/voice';
-import { Message } from 'discord.js';
+import { Message, VoiceChannel } from 'discord.js';
 import { CommandResponse } from '@/types/Response';
 import { CommandHelpBuilder } from '@/utils/commandHelpBuilder';
 
 export class PlayCommand extends Command {
   constructor() {
-    super('play', 'Plays a song from YouTube or Spotify by searching for it.', ['p']);
+    super('play', 'Plays a song from YouTube or Spotify by searching for it.', [
+      'p',
+    ]);
   }
 
-  public async execute(message: Message, args: string[]): Promise<CommandResponse> {
+  public async execute(
+    message: Message,
+    args: string[],
+  ): Promise<CommandResponse> {
     if (!args.length) {
       throw new InvalidCommandArgumentsError();
     }
@@ -47,7 +55,7 @@ export class PlayCommand extends Command {
         guildId: voiceChannel.guild.id,
         adapterCreator: voiceChannel.guild.voiceAdapterCreator,
       });
-      player = createMusicPlayer(guildId, connection);
+      player = createMusicPlayer(guildId, connection, voiceChannel);
     }
 
     for (const song of songs) {
@@ -59,10 +67,14 @@ export class PlayCommand extends Command {
     }
 
     if (songs.length > 1) {
-      return CommandResponse.message(`Enqueued ${songs.length} songs from your playlist/search.`);
+      return CommandResponse.message(
+        `Enqueued ${songs.length} songs from your playlist/search.`,
+      );
     } else {
-      if (player.isPlaying()) {
-        return CommandResponse.message(`Song ${songs[0].title} added to queue.`);
+      if (player.isPlaying) {
+        return CommandResponse.message(
+          `Song ${songs[0].title} added to queue.`,
+        );
       }
       return CommandResponse.message(`Now playing: ${songs[0].title}.`);
     }

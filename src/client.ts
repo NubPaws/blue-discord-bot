@@ -1,4 +1,7 @@
-import { ChannelDoesNotExistError, ChannelIsNotTextBasedError } from '@/utils/errors';
+import {
+  ChannelDoesNotExistError,
+  ChannelIsNotTextBasedError,
+} from '@/utils/errors';
 import { Client, GatewayIntentBits, OAuth2Scopes } from 'discord.js';
 
 const client = new Client({
@@ -43,7 +46,8 @@ async function sendMessage(guildId: string, chatId: string, message: string) {
 export default {
   internal: client,
 
-  selfTag: () => client.user?.tag,
+  selfTag: client.user?.tag,
+  selfId: client.user?.id,
 
   userFromId: (id: string) => client.users.fetch(id),
   guildFromId: (id: string) => client.guilds.fetch(id),

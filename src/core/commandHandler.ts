@@ -83,7 +83,7 @@ export async function handleCommand(message: Message, prefix: string) {
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`Error executing command ${command.name}:`, error.message);
-      sendMessage(message.channel, `Error: ${error.message}`);
+      sendMessage(message.channel, `Error: ${error}`);
     } else {
       logger.error(`Error executing command ${command.name}:`, error);
     }

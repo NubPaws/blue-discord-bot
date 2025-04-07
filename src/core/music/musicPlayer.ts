@@ -3,134 +3,143 @@ import {
   AudioPlayerStatus,
   createAudioPlayer,
   createAudioResource,
+  NoSubscriberBehavior,
   VoiceConnection,
+  VoiceConnectionStatus,
 } from '@discordjs/voice';
 import { Song } from '@/types/music/Song';
-import logger from '@/utils/logger';
-import { spawn } from 'child_process';
-import Stream from 'stream';
-
-function createYtDlpStream(url: string): Stream.Readable {
-  const ytdlp = spawn('yt-dlp', [
-    '--quiet', // Suppress non-critical output.
-    '--no-progress', // Disable the progress bar.
-    '-f',
-    'bestaudio',
-    '-o',
-    '-', // Output to stdout.
-    url,
-  ]);
-
-  ytdlp.stderr.on('data', (data) => {
-    logger.log('yt-dlp', `${data}`);
-  });
-
-  ytdlp.on('exit', (code) => {
-    logger.log('yt-dlp', `Exited with code ${code}`);
-  });
-
-  return ytdlp.stdout;
-}
-
-function createFfmpegStream(stream: Stream.Readable): Stream.Readable {
-  const ffmpeg = spawn('ffmpeg', [
-    '-loglevel',
-    '0', // Suppress non-error logs.
-    '-i',
-    'pipe:0', // Input from yt-dlp's stdout.
-    '-f',
-    'opus', // Output format: Opus.
-    '-ar',
-    '48000', // Set sample rate to 48000 Hz.
-    '-ac',
-    '2', // Output stereo audio.
-    'pipe:1', // Output to stdout.
-  ]);
-
-  ffmpeg.stderr.on('data', (data) => {
-    logger.log('ffmpeg', `Error: ${data}`);
-  });
-
-  ffmpeg.on('exit', (code) => {
-    logger.log('ffmpeg', `Exited with code ${code}`);
-  });
-
-  stream.pipe(ffmpeg.stdin);
-
-  return ffmpeg.stdout;
-}
+import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
+import { VoiceBasedChannel, VoiceState } from 'discord.js';
+import client from '@/client';
 
 export class PlayingSongError extends Error {}
 
 export class MusicPlayer {
+  private connection: VoiceConnection;
+  private player: AudioPlayer;
   private queue: Song[] = [];
-  private audioPlayer: AudioPlayer = createAudioPlayer();
+  private currentProcess: ChildProcessWithoutNullStreams | null = null;
 
-  constructor(private connection: VoiceConnection) {
-    connection.subscribe(this.audioPlayer);
+  private channel: VoiceBasedChannel;
 
-    this.audioPlayer.on(AudioPlayerStatus.Idle, () => {
-      if (this.queue.length > 0) {
-        this.playNext();
-      }
+  constructor(connection: VoiceConnection, channel: VoiceBasedChannel) {
+    this.connection = connection;
+    this.channel = channel;
+
+    this.player = createAudioPlayer({
+      behaviors: { noSubscriber: NoSubscriberBehavior.Stop },
     });
 
-    // Simple error handler here.
-    this.audioPlayer.on('error', (error) => {
-      logger.error('Audio palyer error:', error);
-      if (this.queue.length > 0) {
-        this.playNext();
-      }
+    this.connection.subscribe(this.player);
+
+    client.internal.on('voiceStateUpdate', (oldState, newState) => {
+      this.onVoiceStateUpdate(oldState, newState);
     });
   }
 
-  public enqueue(song: Song) {
+  public enqueue(song: Song): void {
     this.queue.push(song);
-    if (this.audioPlayer.state.status !== AudioPlayerStatus.Playing) {
-      this.playNext();
-    }
   }
 
-  public async playNext() {
+  public playNext(): void {
+    if (this.player.state.status !== AudioPlayerStatus.Idle) {
+      this.player.stop(true);
+    }
+    this.killCurrentProcess();
+
     if (this.queue.length === 0) {
       return;
     }
 
-    const song = this.queue.shift()!;
+    const nextSong = this.queue.shift()!;
+    this.currentProcess = spawn('yt-dlp', [
+      '-o',
+      '-',
+      '-f',
+      'bestaudio/best',
+      nextSong.url,
+    ]);
 
-    try {
-      const ytDlpStream = createYtDlpStream(song.url);
+    // In case we want to dispaly what yt-dlp is doing and what not.
+    // this.currentProcess.stderr.on('data', (data) => {
+    //   logger.log('yt-dlp', `${data}`);
+    // });
 
-      const ffmpegStream = createFfmpegStream(ytDlpStream);
+    // this.currentProcess.on('exit', (code) => {
+    //   logger.log('yt-dlp', `Exited with code ${code}`);
+    // });
 
-      const resource = createAudioResource(ffmpegStream);
-      this.audioPlayer.play(resource);
-    } catch (error) {
-      this.playNext();
-      throw new PlayingSongError(`${error}`);
+    const resource = createAudioResource(this.currentProcess.stdout);
+    this.player.play(resource);
+  }
+
+  public pause(): void {
+    if (this.player.state.status === AudioPlayerStatus.Playing) {
+      this.player.pause();
     }
   }
 
-  public stop() {
+  public resume(): void {
+    if (this.player.state.status === AudioPlayerStatus.Paused) {
+      this.player.unpause();
+    }
+  }
+
+  public stop(): void {
     this.queue = [];
-    this.audioPlayer.stop();
+    this.player.stop(true);
+    this.killCurrentProcess();
   }
 
-  public skip() {
-    this.audioPlayer.stop();
-  }
-
-  public isPlaying(): boolean {
-    return this.audioPlayer.state.status === AudioPlayerStatus.Playing;
-  }
-
-  public disconnect() {
-    this.queue = [];
-    this.audioPlayer.stop();
-    this.connection.destroy();
+  public skip(): void {
+    this.player.stop(true);
+    this.killCurrentProcess();
+    this.playNext();
   }
 
   public getQueue(): Song[] {
-    return this.queue.map((song) => ({ title: song.title, url: song.url }));
+    return this.queue;
+  }
+
+  get isPlaying(): boolean {
+    return this.player.state.status === AudioPlayerStatus.Playing;
+  }
+
+  private killCurrentProcess(): void {
+    if (this.currentProcess) {
+      this.currentProcess.kill('SIGTERM');
+      this.currentProcess = null;
+    }
+  }
+
+  private onVoiceStateUpdate(oldState: VoiceState, newState: VoiceState): void {
+    const oldChannelId = oldState.channelId;
+    const newChannelId = newState.channelId;
+    if (oldChannelId !== this.channel.id && newChannelId !== this.channel.id) {
+      return;
+    }
+
+    this.channel
+      .fetch()
+      .then((voiceChannel) => {
+        // Count members that aren't bots
+        const nonBotMembers = voiceChannel.members.filter(
+          (member) => !member.user.bot,
+        );
+        if (nonBotMembers.size === 0) {
+          // No real users are left, so let's disconnect.
+          this.disconnect();
+        }
+      })
+      .catch(() => {
+        // If channel doesn't exist or some error, also safe to disconnect.
+        this.disconnect();
+      });
+  }
+
+  private disconnect(): void {
+    this.stop();
+    if (this.connection.state.status !== VoiceConnectionStatus.Destroyed)
+      this.connection.destroy();
   }
 }
