@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Channel, Message } from 'discord.js';
 import { Command } from '@/types/Command';
 import logger from '@/utils/logger';
 import environment from '@/config/environment';
@@ -27,6 +27,12 @@ export function loadCommands() {
   logger.info(`Loaded ${commandsArray.length} commands.`);
 }
 
+async function sendMessage(channel: Channel, contents: string) {
+  if (channel.isSendable()) {
+    await channel.send(contents);
+  }
+}
+
 export async function handleCommand(message: Message, prefix: string) {
   if (!message.content.startsWith(prefix) || message.author.bot) {
     return;
@@ -47,10 +53,22 @@ export async function handleCommand(message: Message, prefix: string) {
   }
 
   try {
-    logger.log('handleCommand', `Executing ${command.name} with arguments ${args}`);
-    await command.execute(message, args);
+    const response = await command.execute(message, args);
+    if (!response) {
+      return;
+    }
+
+    if (response.reply) {
+      message.reply(response.contents);
+    } else {
+      sendMessage(message.channel, response.contents);
+    }
   } catch (error) {
-    logger.error(`Error executing command ${command.name}:`, error);
-    await message.reply('There was an error executing that command.');
+    if (error instanceof Error) {
+      logger.error(`Error executing command ${command.name}:`, error.message);
+      sendMessage(message.channel, `Error: ${error.message}`);
+    } else {
+      logger.error(`Error executing command ${command.name}:`, error);
+    }
   }
 }

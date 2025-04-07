@@ -5,6 +5,7 @@ import { Message } from 'discord.js';
 import { AlignmentEnum, AsciiTable3 } from 'ascii-table3';
 import { ScoreboardDoesNotExistsError } from '@/utils/fun/errors';
 import { codeBlock, mentionUser } from '@/utils/formatter';
+import client from '@/client';
 
 function handleCreate(guildId: string, scoreboardName: string) {
   scoreboardHandler.create(guildId, scoreboardName);
@@ -22,16 +23,23 @@ function handleRemove(guildId: string, scoreboardName: string, userId: string) {
   scoreboardHandler.removeScore(guildId, scoreboardName, userId);
 }
 
-function handleShow(guildId: string, scoreboardName: string): string {
+async function handleShow(guildId: string, scoreboardName: string): Promise<string> {
   const data = scoreboardHandler.get(guildId, scoreboardName);
   if (Object.keys(data).length === 0) {
     throw new ScoreboardDoesNotExistsError();
   }
 
+  const toDisplay = new Array<Array<string | number>>();
+  await Promise.all(
+    Object.entries(data).map(async ([user, score]) =>
+      toDisplay.push([(await client.userFromId(user)).username, score]),
+    ),
+  );
+
   const table = new AsciiTable3(scoreboardName)
     .setHeading('User', 'Score')
     .setAlign(2, AlignmentEnum.CENTER)
-    .addRowMatrix(Object.entries(data).map(([user, score]) => [mentionUser(user), score]));
+    .addRowMatrix(toDisplay);
 
   return codeBlock(table.toString());
 }
@@ -88,7 +96,7 @@ const command: Command = {
         break;
       }
       case 'show':
-        await message.reply(handleShow(guildId, scoreboardName));
+        await message.reply(await handleShow(guildId, scoreboardName));
         break;
     }
   },
