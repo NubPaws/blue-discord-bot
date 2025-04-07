@@ -1,6 +1,6 @@
 import { google, youtube_v3 } from 'googleapis';
-import environment from '../config/environment';
-import { Song } from '../types/Song';
+import environment from '@/config/environment';
+import { Song } from '@/types/music/Song';
 import { isValidUrl } from './urlValidators';
 
 function isUrl(url: string): boolean {

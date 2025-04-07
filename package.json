@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/core/bot.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/core/bot.ts"
+    "start": "node dist/bot.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/bot.ts"
   },
   "keywords": [],
   "author": "NubPaws",

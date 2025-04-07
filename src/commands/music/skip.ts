@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
-import { Command } from '../types/Command';
-import { GuildNotFoundError } from '../utils/errors';
-import { getMusicPlayer } from '../core/musicManager';
+import { Command } from '@/types/Command';
+import { GuildNotFoundError } from '@/utils/errors';
+import { getMusicPlayer } from '@/core/music/musicManager';
 
-export const command: Command = {
+const command: Command = {
   name: 'skip',
   aliases: [],
   description: 'Skips the current song in the queue.',
@@ -19,3 +19,5 @@ export const command: Command = {
     await message.reply('Skipped the current song.');
   },
 };
+
+export default command;

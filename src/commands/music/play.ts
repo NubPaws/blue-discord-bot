@@ -1,13 +1,13 @@
-import { Message } from 'discord.js';
-import { Command } from '../types/Command';
-import { isValidUrl } from '../utils/urlValidators';
-import { Song } from '../types/Song';
-import { GuildNotFoundError, InvalidCommandArgumentsError } from '../utils/errors';
-import youtubeHandler from '../utils/youtubeHandler';
-import spotifyHandler from '../utils/spotifyHandler';
-import { createMusicPlayer, getMusicPlayer } from '../core/musicManager';
-import { MusicPlayer } from '../core/musicPlayer';
+import { createMusicPlayer, getMusicPlayer } from '@/core/music/musicManager';
+import { MusicPlayer } from '@/core/music/musicPlayer';
+import { Command } from '@/types/Command';
+import { Song } from '@/types/music/Song';
+import { GuildNotFoundError, InvalidCommandArgumentsError } from '@/utils/errors';
+import spotifyHandler from '@/utils/music/spotifyHandler';
+import { isValidUrl } from '@/utils/music/urlValidators';
+import youtubeHandler from '@/utils/music/youtubeHandler';
 import { joinVoiceChannel } from '@discordjs/voice';
+import { Message } from 'discord.js';
 
 async function getSongsFromQuery(query: string): Promise<Song[]> {
   if (!isValidUrl(query)) {

@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
-import { Command } from '../types/Command';
-import { GuildNotFoundError } from '../utils/errors';
-import { getMusicPlayer } from '../core/musicManager';
+import { Command } from '@/types/Command';
+import { GuildNotFoundError } from '@/utils/errors';
+import { getMusicPlayer } from '@/core/music/musicManager';
 
-export const command: Command = {
+const command: Command = {
   name: 'queue',
   aliases: ['q'],
   description: 'Displays the current music queue.',
@@ -23,3 +23,5 @@ export const command: Command = {
     await message.reply(`Current queue:\n${queueMessage}`);
   },
 };
+
+export default command;
