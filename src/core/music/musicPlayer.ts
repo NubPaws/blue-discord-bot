@@ -3,11 +3,10 @@ import {
   AudioPlayerStatus,
   createAudioPlayer,
   createAudioResource,
-  StreamType,
   VoiceConnection,
 } from '@discordjs/voice';
-import { Song } from '../types/Song';
-import logger from '../utils/logger';
+import { Song } from '@/types/music/Song';
+import logger from '@/utils/logger';
 import { spawn } from 'child_process';
 import Stream from 'stream';
 

@@ -1,7 +1,7 @@
 import SpotifyWebApi from 'spotify-web-api-node';
-import environment from '../config/environment';
-import logger from './logger';
-import { Song, SpotifySong } from '../types/Song';
+import environment from '@/config/environment';
+import logger from '@/utils/logger';
+import { Song, SpotifySong } from '@/types/music/Song';
 import youtubeHandler from './youtubeHandler';
 
 const spotifyApi = new SpotifyWebApi({

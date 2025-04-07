@@ -1,21 +1,10 @@
 import { Message } from 'discord.js';
-import { Command } from '../types/Command';
-import logger from '../utils/logger';
+import { Command } from '@/types/Command';
+import logger from '@/utils/logger';
+import environment from '@/config/environment';
+import music from '@/commands/music';
 
-import playCommand from '../commands/play';
-import * as stopCommand from '../commands/stop';
-import * as skipCommand from '../commands/skip';
-import * as disconnectCommand from '../commands/disconnect';
-import * as queueCommand from '../commands/queue';
-import environment from '../config/environment';
-
-const commandsArray: Command[] = [
-  playCommand,
-  stopCommand.command,
-  skipCommand.command,
-  disconnectCommand.command,
-  queueCommand.command,
-];
+const commandsArray: Command[] = [...music];
 
 const commands = new Map<string, Command>();
 

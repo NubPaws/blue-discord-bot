@@ -1,6 +1,6 @@
 import { VoiceConnection } from '@discordjs/voice';
 import { MusicPlayer } from './musicPlayer';
-import { NoActiveMusicPlayerError } from '../utils/errors';
+import { NoActiveMusicPlayerError } from '@/utils/errors';
 
 const players: Map<string, MusicPlayer> = new Map();
 
