@@ -5,6 +5,7 @@ import { Message } from 'discord.js';
 import { AlignmentEnum, AsciiTable3 } from 'ascii-table3';
 import { ScoreboardDoesNotExistsError } from '@/utils/fun/errors';
 import { codeBlock } from '@/utils/formatter';
+import logger from '@/utils/logger';
 
 function getUserIdFromMention(mention: string) {
   const userIdMatch = mention.match(/^<@!?(\d+)>$/);
@@ -24,6 +25,7 @@ function handleDelete(guildId: string, scoreboardName: string) {
 }
 
 function handleSet(guildId: string, scoreboardName: string, args: string[]) {
+  logger.info(guildId, scoreboardName, args);
   const mention = args[2];
   const valueArg = args[3];
 
