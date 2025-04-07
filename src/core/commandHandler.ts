@@ -72,7 +72,7 @@ export async function handleCommand(message: Message, prefix: string) {
 
   const command = commands.get(commandName);
   if (!command) {
-    await message.reply(`Unknown command \`${commandName}\`.`);
+    // await message.reply(`Unknown command \`${commandName}\`.`);
     return;
   }
 
