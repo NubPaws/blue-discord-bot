@@ -14,7 +14,7 @@ export class DisconnectCommand extends Command {
     );
   }
 
-  public async execute(message: Message, args: string[]): Promise<CommandResponse> {
+  public async execute(message: Message): Promise<CommandResponse> {
     const guildId = message.guild?.id;
     if (!guildId) {
       throw new GuildNotFoundError();

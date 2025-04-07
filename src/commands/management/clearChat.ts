@@ -1,6 +1,7 @@
 import { Command } from '@/types/Command';
 import { CommandResponse } from '@/types/Response';
 import { CommandHelpBuilder } from '@/utils/commandHelpBuilder';
+import { GuildNotFoundError } from '@/utils/errors';
 import { Message, PermissionsBitField, TextChannel } from 'discord.js';
 
 export class ClearChatCommand extends Command {
@@ -9,6 +10,10 @@ export class ClearChatCommand extends Command {
   }
 
   public async execute(message: Message, args: string[]): Promise<CommandResponse> {
+    if (!message.guild?.id) {
+      throw new GuildNotFoundError();
+    }
+
     if (!message.member?.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
       return CommandResponse.message('You do not have permission to delete messages.');
     }

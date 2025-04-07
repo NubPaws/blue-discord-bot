@@ -18,7 +18,7 @@ export class PlayCommand extends Command {
 
   public async execute(message: Message, args: string[]): Promise<CommandResponse> {
     if (!args.length) {
-      return CommandResponse.message('Please provide a song name or URL.');
+      throw new InvalidCommandArgumentsError();
     }
 
     const voiceChannel = message.member?.voice.channel;
@@ -61,7 +61,10 @@ export class PlayCommand extends Command {
     if (songs.length > 1) {
       return CommandResponse.message(`Enqueued ${songs.length} songs from your playlist/search.`);
     } else {
-      return CommandResponse.message(`Now playing: ${songs[0].title}`);
+      if (player.isPlaying()) {
+        return CommandResponse.message(`Song ${songs[0].title} added to queue.`);
+      }
+      return CommandResponse.message(`Now playing: ${songs[0].title}.`);
     }
   }
 
