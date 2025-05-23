@@ -1,6 +1,6 @@
 import logger from '@/utils/logger';
 import client from '@/client';
-import { handleCommand, loadCommands } from '@/core/commandHandler';
+import { handleCommand, loadCommands } from '@/cogsLoader';
 import environment from '@/config/environment';
 import { Events } from 'discord.js';
 

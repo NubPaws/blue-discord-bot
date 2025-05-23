@@ -7,12 +7,10 @@ import {
   VoiceConnection,
   VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { Song } from '@/types/music/Song';
+import { Song } from '@/cogs/music/types/Song';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { VoiceBasedChannel, VoiceState } from 'discord.js';
 import client from '@/client';
-
-export class PlayingSongError extends Error {}
 
 export class MusicPlayer {
   private connection: VoiceConnection;
@@ -22,7 +20,13 @@ export class MusicPlayer {
 
   private channel: VoiceBasedChannel;
 
-  constructor(connection: VoiceConnection, channel: VoiceBasedChannel) {
+  private onDestroy: (guildId: string) => void;
+
+  constructor(
+    connection: VoiceConnection,
+    channel: VoiceBasedChannel,
+    onDestroy: (guildId: string) => void,
+  ) {
     this.connection = connection;
     this.channel = channel;
 
@@ -30,7 +34,17 @@ export class MusicPlayer {
       behaviors: { noSubscriber: NoSubscriberBehavior.Stop },
     });
 
+    this.player.on(AudioPlayerStatus.Idle, () => {
+      this.playNext();
+    });
+
+    this.player.on('error', (err) => {
+      this.playNext();
+    });
+
     this.connection.subscribe(this.player);
+
+    this.onDestroy = onDestroy;
 
     client.internal.on('voiceStateUpdate', (oldState, newState) => {
       this.onVoiceStateUpdate(oldState, newState);
@@ -57,6 +71,7 @@ export class MusicPlayer {
       '-',
       '-f',
       'bestaudio/best',
+      '--no-part',
       nextSong.url,
     ]);
 
@@ -97,10 +112,12 @@ export class MusicPlayer {
   }
 
   private killCurrentProcess(): void {
-    if (this.currentProcess) {
-      this.currentProcess.kill('SIGTERM');
-      this.currentProcess = null;
-    }
+    if (!this.currentProcess) return;
+
+    const proc = this.currentProcess;
+    this.currentProcess = null;
+
+    proc.kill('SIGTERM');
   }
 
   private onVoiceStateUpdate(oldState: VoiceState, newState: VoiceState): void {
@@ -132,5 +149,7 @@ export class MusicPlayer {
     this.stop();
     if (this.connection.state.status !== VoiceConnectionStatus.Destroyed)
       this.connection.destroy();
+
+    this.onDestroy(this.channel.guild.id);
   }
 }

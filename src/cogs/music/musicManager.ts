@@ -1,6 +1,6 @@
 import { VoiceConnection } from '@discordjs/voice';
 import { MusicPlayer } from './musicPlayer';
-import { NoActiveMusicPlayerError } from '@/utils/music/errors';
+import { NoActiveMusicPlayerError } from '@/cogs/music/errors';
 import { VoiceBasedChannel } from 'discord.js';
 
 const players: Map<string, MusicPlayer> = new Map();
@@ -19,7 +19,7 @@ export function createMusicPlayer(
   connection: VoiceConnection,
   channel: VoiceBasedChannel,
 ): MusicPlayer {
-  const player = new MusicPlayer(connection, channel);
+  const player = new MusicPlayer(connection, channel, removeMusicPlayer);
   players.set(guildId, player);
 
   return player;

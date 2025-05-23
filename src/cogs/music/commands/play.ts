@@ -1,14 +1,11 @@
-import { createMusicPlayer, getMusicPlayer } from '@/core/music/musicManager';
-import { MusicPlayer } from '@/core/music/musicPlayer';
+import { createMusicPlayer, getMusicPlayer } from '@/cogs/music/musicManager';
+import { MusicPlayer } from '@/cogs/music/musicPlayer';
 import { Command } from '@/types/Command';
-import { Song } from '@/types/music/Song';
-import {
-  GuildNotFoundError,
-  InvalidCommandArgumentsError,
-} from '@/utils/errors';
-import spotifyHandler from '@/utils/music/spotifyHandler';
-import { isValidUrl } from '@/utils/music/urlValidators';
-import youtubeHandler from '@/utils/music/youtubeHandler';
+import { Song } from '@/cogs/music/types/Song';
+import { GuildNotFoundError, InvalidCommandArgumentsError } from '@/errors';
+import spotifyHandler from '@/cogs/music/utils/spotifyHandler';
+import { isValidUrl } from '@/cogs/music/utils/urlValidators';
+import youtubeHandler from '@/cogs/music/utils/youtubeHandler';
 import { joinVoiceChannel } from '@discordjs/voice';
 import { Message, VoiceChannel } from 'discord.js';
 import { CommandResponse } from '@/types/Response';

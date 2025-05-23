@@ -1,9 +1,9 @@
 import { Channel, Message } from 'discord.js';
 import { Command } from '@/types/Command';
 import logger from '@/utils/logger';
-import music from '@/commands/music';
-import management from '@/commands/management';
-import fun from '@/commands/fun';
+import music from '@/cogs/music';
+import management from '@/cogs/management';
+import fun from '@/cogs/fun';
 import { CommandResponse } from '@/types/Response';
 import { subtitle } from '@/utils/messageFormatter';
 

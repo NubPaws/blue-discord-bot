@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { Command } from '@/types/Command';
-import { getMusicPlayer } from '@/core/music/musicManager';
-import { GuildNotFoundError } from '@/utils/errors';
+import { getMusicPlayer } from '@/cogs/music/musicManager';
+import { GuildNotFoundError } from '@/errors';
 import { CommandResponse } from '@/types/Response';
 import { CommandHelpBuilder } from '@/utils/commandHelpBuilder';
 

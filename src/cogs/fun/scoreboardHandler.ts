@@ -2,7 +2,7 @@ import {
   ScoreboardAlreadyExistsError,
   ScoreboardDoesNotExistsError,
   ScoreboardInvalidAccessError,
-} from '@/utils/fun/errors';
+} from '@/cogs/fun/errors';
 import fs from 'fs';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
