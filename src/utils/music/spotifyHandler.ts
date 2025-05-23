@@ -1,85 +1,72 @@
-import SpotifyWebApi from 'spotify-web-api-node';
+import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import environment from '@/config/environment';
 import logger from '@/utils/logger';
 import { Song, SpotifySong } from '@/types/music/Song';
 import youtubeHandler from './youtubeHandler';
 
-const spotifyApi = new SpotifyWebApi({
-  clientId: environment.spotify.clientId,
-  clientSecret: environment.spotify.clientSecret,
-});
+const spotify = SpotifyApi.withClientCredentials(
+  environment.spotify.clientId,
+  environment.spotify.clientSecret,
+);
 
-let initialized = false;
+const SPOTIFY_URL_RE =
+  /^https?:\/\/open\.spotify\.com\/(?<type>track|playlist)\/(?<id>[a-zA-Z0-9]+)/;
 
-async function initialize() {
-  if (initialized) {
-    return;
+export function isUrl(url: string): boolean {
+  return SPOTIFY_URL_RE.test(url);
+}
+
+function extractId(url: string, kind: 'track' | 'playlist'): string {
+  const match = url.match(SPOTIFY_URL_RE);
+  if (!match || match.groups?.type !== kind) {
+    throw new Error(`Invalid Spotify ${kind} URL: "${url}"`);
   }
+  return match.groups.id;
+}
 
+export async function fetchTrack(url: string): Promise<SpotifySong> {
   try {
-    const data = await spotifyApi.clientCredentialsGrant();
-    spotifyApi.setAccessToken(data.body['access_token']);
-    initialized = true;
+    const trackId = extractId(url, 'track');
+    const track = await spotify.tracks.get(trackId);
+
+    return {
+      title: track.name,
+      artist: track.artists.map((a) => a.name).join(', '),
+    };
+  } catch (error) {
+    logger.error({ error }, 'Failed to fetch Spotify track');
+    throw error;
+  }
+}
+
+export async function fetchPlaylist(url: string): Promise<SpotifySong[]> {
+  try {
+    const playlistId = extractId(url, 'playlist');
+    const playlist = await spotify.playlists.getPlaylist(playlistId);
+
+    return playlist.tracks.items
+      .filter((i): i is (typeof playlist.tracks.items)[number] => !!i.track)
+      .map((item) => ({
+        title: item.track.name,
+        artist: item.track.artists.map((a) => a.name).join(', '),
+      }));
   } catch (err) {
-    logger.error('Failed to retrieve Spotify access token', err);
+    logger.error('Failed to fetch Spotify playlist', err);
+    throw err;
   }
 }
 
-function isUrl(url: string): boolean {
-  return url.includes('spotify.com');
+export async function fetch(query: string): Promise<SpotifySong[]> {
+  return query.includes('/track/')
+    ? [await fetchTrack(query)]
+    : fetchPlaylist(query);
 }
 
-async function fetchTrack(url: string): Promise<SpotifySong> {
-  // Expected format: https://open.spotify.com/track/{id}
-  const regex = /track\/([a-zA-Z0-9]+)/;
-  const match = url.match(regex);
-  if (!match) {
-    throw new Error('Invalid Spotify track URL');
-  }
-
-  const trackId = match[1];
-
-  await initialize();
-
-  const data = await spotifyApi.getTrack(trackId);
-  const track = data.body;
-
-  return {
-    title: track.name,
-    artist: track.artists.map((a) => a.name).join(', '),
-  };
-}
-
-async function fetchPlaylist(url: string): Promise<SpotifySong[]> {
-  // Expected format: https://open.spotify.com/playlist/{id}
-  const regex = /playlist\/([a-zA-Z0-9]+)/;
-  const match = url.match(regex);
-  if (!match) {
-    throw new Error('Invalid Spotify playlist URL');
-  }
-  const playlistId = match[1];
-
-  await initialize();
-
-  const data = await spotifyApi.getPlaylist(playlistId);
-  const tracks = data.body.tracks.items;
-
-  return tracks.map((item: any) => ({
-    title: item.track.name,
-    artist: item.track.artists.map((a: any) => a.name).join(', '),
-  }));
-}
-
-async function fetch(query: string): Promise<SpotifySong[]> {
-  if (query.includes('/track/')) {
-    return [await fetchTrack(query)];
-  }
-  return fetchPlaylist(query);
-}
-
-async function searchYouTube({ title, artist }: SpotifySong): Promise<Song> {
-  const query = `${title} ${artist}`;
-  return await youtubeHandler.fetchSearch(query);
+export async function searchYouTube({
+  title,
+  artist,
+}: SpotifySong): Promise<Song> {
+  return youtubeHandler.fetchSearch(`${title} ${artist}`);
 }
 
 export default {

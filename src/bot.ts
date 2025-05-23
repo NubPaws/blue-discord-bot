@@ -4,8 +4,16 @@ import { handleCommand, loadCommands } from '@/core/commandHandler';
 import environment from '@/config/environment';
 import { Events } from 'discord.js';
 
+process.on('unhandledRejection', (reason) =>
+  logger.error({ error: reason }, 'Unhandled promise rejection'),
+);
+
+process.on('uncaughtException', (error) =>
+  logger.fatal({ error }, 'uncaught exception - shutting down'),
+);
+
 client.internal.once(Events.ClientReady, () => {
-  logger.info(`Logged in as ${client.selfTag}`);
+  logger.info({ clientTag: client.selfTag }, `logged in`);
   loadCommands();
 
   logger.info(`Bot invite link ${client.getInviteLink()}`);

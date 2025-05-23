@@ -60,15 +60,6 @@ export class MusicPlayer {
       nextSong.url,
     ]);
 
-    // In case we want to dispaly what yt-dlp is doing and what not.
-    // this.currentProcess.stderr.on('data', (data) => {
-    //   logger.log('yt-dlp', `${data}`);
-    // });
-
-    // this.currentProcess.on('exit', (code) => {
-    //   logger.log('yt-dlp', `Exited with code ${code}`);
-    // });
-
     const resource = createAudioResource(this.currentProcess.stdout);
     this.player.play(resource);
   }

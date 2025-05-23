@@ -1,32 +1,33 @@
-import fs from 'fs/promises';
+import pino, { LoggerOptions } from 'pino';
+import path from 'node:path';
+import environment from '@/config/environment';
 
-const INFO_FROM = 'info';
-const ERROR_FROM = 'error';
-const WARN_FROM = 'warning';
+const { logLevel = 'info', logPretty = 'true', logFile } = environment.logger;
 
-let fileOut = '';
-
-function setOutputFile(filename: string) {
-  fileOut = filename;
-}
-
-function display(from: string, ...args: any[]) {
-  console.log(`[${from}]:`, ...args);
-  if (fileOut !== '') {
-    fs.appendFile(fileOut, `[${from}]: ${args.join(' ')}`).catch((reason: any) => {
-      setOutputFile('');
-      display(ERROR_FROM, 'failed to write to log file, clearing output file.', reason);
-    });
-  }
-}
-
-export default {
-  info: (...args: any[]) => display(INFO_FROM, ...args),
-  error: (...args: any[]) => display(ERROR_FROM, ...args),
-  warn: (...args: any[]) => display(WARN_FROM, ...args),
-
-  log: (source: string, ...args: any[]) => display(source, ...args),
-
-  setLogFile: setOutputFile,
-  unsetLogFile: () => setOutputFile(''),
+const commonOpts: LoggerOptions = {
+  level: logLevel,
+  timestamp: pino.stdTimeFunctions.isoTime,
 };
+
+const streams: pino.DestinationStream[] = [];
+
+if (logPretty === 'true') {
+  streams.push(
+    pino.transport({
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'SYS:standard',
+        ignore: 'pid,hostname',
+      },
+    }),
+  );
+} else {
+  streams.push(process.stdout);
+}
+
+const logger = pino(commonOpts, pino.multistream(streams));
+
+export default logger;
+
+export type Log = typeof logger;

@@ -2,31 +2,38 @@
   "name": "blue-discord-bot",
   "version": "1.0.0",
   "description": "A modular Discord bot in TypeScript with music and commands.",
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc && tsc-alias",
-    "start": "node dist/bot.js",
-    "dev": "ts-node-dev --respawn --require tsconfig-paths/register --transpile-only src/bot.ts"
+  "type": "module",
+  "engines": {
+    "node": ">=18.14"
   },
-  "keywords": [],
-  "author": "NubPaws",
-  "license": "ISC",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "start": "node dist/bot.js",
+    "dev": "tsx watch src/bot.ts"
+  },
   "dependencies": {
     "@discordjs/voice": "^0.18.0",
+    "@spotify/web-api-ts-sdk": "^1.2.0",
     "ascii-table3": "^0.9.0",
-    "discord.js": "^14.18.0",
+    "discord.js": "^14.14.1",
     "dotenv": "^16.4.7",
     "googleapis": "^148.0.0",
-    "spotify-web-api-node": "^5.0.2"
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
-    "@types/spotify-web-api-node": "^5.0.11",
-    "eslint": "^9.24.0",
-    "ts-node": "^10.9.2",
-    "ts-node-dev": "^2.0.0",
-    "tsc-alias": "^1.8.13",
-    "tsconfig-paths": "^4.2.0",
+    "@types/pino": "^7.0.4",
+    "eslint": "^9.25.0",
+    "rimraf": "^5.0.1",
+    "tsc-alias": "^1.8.16",
+    "tsx": "^4.7.1",
     "typescript": "^5.8.3"
+  },
+  "overrides": {
+    "glob": "^9.3.5",
+    "superagent": "^10.2.1",
+    "undici": "^6.21.2"
   }
 }

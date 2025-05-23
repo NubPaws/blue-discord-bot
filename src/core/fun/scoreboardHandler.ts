@@ -5,13 +5,10 @@ import {
 } from '@/utils/fun/errors';
 import fs from 'fs';
 import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const BASE_PATH = path.resolve(
-  dirname(require.main?.filename as string),
-  '..',
-  'data',
-  'scoreboard',
-);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const BASE_PATH = path.resolve(__dirname, '..', 'data', 'scoreboard');
 
 function ensureDirectory(guildId: string) {
   const guildDir = path.join(BASE_PATH, guildId);
@@ -20,12 +17,18 @@ function ensureDirectory(guildId: string) {
   }
 }
 
-function getScoreboardFilePath(guildId: string, scoreboardName: string): string {
+function getScoreboardFilePath(
+  guildId: string,
+  scoreboardName: string,
+): string {
   ensureDirectory(guildId);
   return path.join(BASE_PATH, guildId, `${scoreboardName}.csv`);
 }
 
-function loadScoreboard(guildId: string, scoreboardName: string): Record<string, number> {
+function loadScoreboard(
+  guildId: string,
+  scoreboardName: string,
+): Record<string, number> {
   const filePath = getScoreboardFilePath(guildId, scoreboardName);
   if (!fs.existsSync(filePath)) {
     return {};
@@ -48,7 +51,11 @@ function loadScoreboard(guildId: string, scoreboardName: string): Record<string,
   return scoreboard;
 }
 
-function writeScoreboard(guildId: string, scoreboardName: string, data: Record<string, number>) {
+function writeScoreboard(
+  guildId: string,
+  scoreboardName: string,
+  data: Record<string, number>,
+) {
   const filePath = getScoreboardFilePath(guildId, scoreboardName);
   let lines = '';
 
@@ -72,7 +79,12 @@ function getScoreboard(guildId: string, scoreboardName: string) {
   return loadScoreboard(guildId, scoreboardName);
 }
 
-function setScore(guildId: string, scoreboardName: string, userId: string, value: number) {
+function setScore(
+  guildId: string,
+  scoreboardName: string,
+  userId: string,
+  value: number,
+) {
   const scoreboard = loadScoreboard(guildId, scoreboardName);
   scoreboard[userId] = value;
   writeScoreboard(guildId, scoreboardName, scoreboard);
@@ -81,7 +93,9 @@ function setScore(guildId: string, scoreboardName: string, userId: string, value
 function removeScore(guildId: string, scoreboardName: string, userId: string) {
   const scoreboard = loadScoreboard(guildId, scoreboardName);
   if (scoreboard[userId] === undefined) {
-    throw new ScoreboardInvalidAccessError(`User ${userId} does not exist in ${scoreboardName}`);
+    throw new ScoreboardInvalidAccessError(
+      `User ${userId} does not exist in ${scoreboardName}`,
+    );
   }
 
   delete scoreboard[userId];
