@@ -1,7 +1,7 @@
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import environment from '@/config/environment';
 import logger from '@/utils/logger';
-import { Song, SpotifySong } from '@/types/music/Song';
+import { Song, SpotifySong } from '@/cogs/music/types/Song';
 import youtubeHandler from './youtubeHandler';
 
 const spotify = SpotifyApi.withClientCredentials(

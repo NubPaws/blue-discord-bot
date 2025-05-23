@@ -1,6 +1,6 @@
 import { google, youtube_v3 } from 'googleapis';
 import environment from '@/config/environment';
-import { Song } from '@/types/music/Song';
+import { Song } from '@/cogs/music/types/Song';
 import { isValidUrl } from './urlValidators';
 
 function isUrl(url: string): boolean {
@@ -49,7 +49,9 @@ async function fetchVideo(url: string): Promise<Song> {
 
   const urlObj = new URL(url);
   const videoId =
-    urlObj.hostname === 'youtu.be' ? urlObj.pathname.slice(1) : urlObj.searchParams.get('v');
+    urlObj.hostname === 'youtu.be'
+      ? urlObj.pathname.slice(1)
+      : urlObj.searchParams.get('v');
 
   if (!videoId) {
     throw new Error('Coud not extract video ID from URL');

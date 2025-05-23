@@ -1,7 +1,4 @@
-import {
-  ChannelDoesNotExistError,
-  ChannelIsNotTextBasedError,
-} from '@/utils/errors';
+import { ChannelDoesNotExistError, ChannelIsNotTextBasedError } from '@/errors';
 import { Client, GatewayIntentBits, OAuth2Scopes } from 'discord.js';
 
 const client = new Client({

@@ -7,12 +7,10 @@ import {
   VoiceConnection,
   VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { Song } from '@/types/music/Song';
+import { Song } from '@/cogs/music/types/Song';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { VoiceBasedChannel, VoiceState } from 'discord.js';
 import client from '@/client';
-
-export class PlayingSongError extends Error {}
 
 export class MusicPlayer {
   private connection: VoiceConnection;

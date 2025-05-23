@@ -1,13 +1,13 @@
 import { Message } from 'discord.js';
 import { Command } from '@/types/Command';
-import { GuildNotFoundError } from '@/utils/errors';
-import { getMusicPlayer } from '@/core/music/musicManager';
+import { getMusicPlayer } from '@/cogs/music/musicManager';
+import { GuildNotFoundError } from '@/errors';
 import { CommandResponse } from '@/types/Response';
 import { CommandHelpBuilder } from '@/utils/commandHelpBuilder';
 
-export class SkipCommand extends Command {
+export class PauseCommand extends Command {
   constructor() {
-    super('skip', 'Skips the current song in the queue.');
+    super('pause', 'Pauses the currently playing song.');
   }
 
   public async execute(message: Message): Promise<CommandResponse> {
@@ -17,8 +17,8 @@ export class SkipCommand extends Command {
     }
 
     const player = getMusicPlayer(guildId);
-    player.skip();
-    return CommandResponse.message('Skipped the current song.');
+    player.pause();
+    return CommandResponse.message('Paused the current song.');
   }
 
   public help(): string {

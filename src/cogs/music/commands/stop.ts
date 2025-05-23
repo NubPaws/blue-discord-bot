@@ -1,29 +1,27 @@
 import { Message } from 'discord.js';
 import { Command } from '@/types/Command';
-import { GuildNotFoundError } from '@/utils/errors';
-import { getMusicPlayer, removeMusicPlayer } from '@/core/music/musicManager';
+import { getMusicPlayer } from '@/cogs/music/musicManager';
+import { GuildNotFoundError } from '@/errors';
 import { CommandResponse } from '@/types/Response';
 import { CommandHelpBuilder } from '@/utils/commandHelpBuilder';
 
-export class DisconnectCommand extends Command {
+export class StopCommand extends Command {
   constructor() {
-    super(
-      'disconnect',
-      'Disconnects the bot from the voice channel and clears any active queues.',
-      ['dc'],
-    );
+    super('stop', 'Stops the music and clears the queue.');
   }
 
-  public async execute(message: Message): Promise<CommandResponse> {
+  public async execute(
+    message: Message,
+    args: string[],
+  ): Promise<CommandResponse> {
     const guildId = message.guild?.id;
     if (!guildId) {
       throw new GuildNotFoundError();
     }
 
     const player = getMusicPlayer(guildId);
-    player.disconnect();
-    removeMusicPlayer(guildId);
-    return CommandResponse.message('Disconnected.');
+    player.stop();
+    return CommandResponse.message('Stopping...');
   }
 
   public help(): string {
