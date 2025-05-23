@@ -11,8 +11,6 @@ import { Song } from '@/cogs/music/types/Song';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { VoiceBasedChannel, VoiceState } from 'discord.js';
 import client from '@/client';
-import path from 'path';
-import fs from 'fs';
 
 export class MusicPlayer {
   private connection: VoiceConnection;
@@ -34,6 +32,14 @@ export class MusicPlayer {
 
     this.player = createAudioPlayer({
       behaviors: { noSubscriber: NoSubscriberBehavior.Stop },
+    });
+
+    this.player.on(AudioPlayerStatus.Idle, () => {
+      this.playNext();
+    });
+
+    this.player.on('error', (err) => {
+      this.playNext();
     });
 
     this.connection.subscribe(this.player);
