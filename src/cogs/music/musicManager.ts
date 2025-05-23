@@ -19,7 +19,7 @@ export function createMusicPlayer(
   connection: VoiceConnection,
   channel: VoiceBasedChannel,
 ): MusicPlayer {
-  const player = new MusicPlayer(connection, channel);
+  const player = new MusicPlayer(connection, channel, removeMusicPlayer);
   players.set(guildId, player);
 
   return player;
