@@ -80,12 +80,11 @@ export async function handleCommand(message: Message, prefix: string) {
     const response = await command.execute(message, args);
 
     handleResponse(response, message);
-  } catch (error) {
-    if (error instanceof Error) {
+  } catch (error: any) {
+    if (error) {
       logger.error(`Error executing command ${command.name}:`, error.message);
+
       sendMessage(message.channel, `Error: ${error}`);
-    } else {
-      logger.error(`Error executing command ${command.name}:`, error);
     }
   }
 }

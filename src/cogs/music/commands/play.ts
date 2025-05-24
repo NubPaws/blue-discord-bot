@@ -67,14 +67,11 @@ export class PlayCommand extends Command {
       return CommandResponse.message(
         `Enqueued ${songs.length} songs from your playlist/search.`,
       );
-    } else {
-      if (player.isPlaying) {
-        return CommandResponse.message(
-          `Song ${songs[0].title} added to queue.`,
-        );
-      }
-      return CommandResponse.message(`Now playing: ${songs[0].title}.`);
     }
+    if (player.isPlaying) {
+      return CommandResponse.message(`Song ${songs[0].title} added to queue.`);
+    }
+    return CommandResponse.message(`Now playing: ${songs[0].title}.`);
   }
 
   private async getSongsFromQuery(query: string): Promise<Song[]> {
