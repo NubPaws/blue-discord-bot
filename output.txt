@@ -1,0 +1,8 @@
+
+> blue-discord-bot@1.0.0 build
+> npm run clean && tsc && tsc-alias
+
+
+> blue-discord-bot@1.0.0 clean
+> rimraf dist
+
